@@ -100,7 +100,8 @@ class LoginActivity : AppCompatActivity() {
                 .setTitle("Fingerprint authentication")
                 .setSubtitle("Authentication is required")
                 .setDescription("This app uses fingerprint for the swift and secure access to password storage")
-                .setNegativeButton("Cancel",
+                .setNegativeButton(
+                    "Cancel",
                     this.mainExecutor
                 ) { _, _ -> }
                 .build()

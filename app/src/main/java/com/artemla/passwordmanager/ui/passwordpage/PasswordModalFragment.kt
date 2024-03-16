@@ -40,11 +40,13 @@ class PasswordModalFragment(private val password: Password?) : DialogFragment() 
             setRandomPasswordListener()
             builder.setView(binding.root)
                 // Add action buttons.
-                .setPositiveButton("Save"
+                .setPositiveButton(
+                    "Save"
                 ) { _, _ ->
                     handleSaveButtonAction(password)
                 }
-                .setNegativeButton("Cancel"
+                .setNegativeButton(
+                    "Cancel"
                 ) { _, _ ->
                     dialog!!.cancel()
                 }

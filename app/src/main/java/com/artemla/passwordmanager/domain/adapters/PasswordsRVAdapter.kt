@@ -75,7 +75,7 @@ class PasswordsRVAdapter : RecyclerView.Adapter<PasswordsRVAdapter.PasswordsView
             .resize(40, 40)
             .centerCrop()
             .networkPolicy(NetworkPolicy.OFFLINE)
-            .into(targetView, object: Callback{
+            .into(targetView, object : Callback {
                 override fun onSuccess() {
                 }
 
