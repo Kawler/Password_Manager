@@ -62,7 +62,7 @@ class PasswordsRVAdapter : RecyclerView.Adapter<PasswordsRVAdapter.PasswordsView
     }
 
     private fun loadPicasso(context: Context, website: String, targetView: ImageView) {
-        val urlString = "http://icons.duckduckgo.com/ip2/$website.ico"
+        val urlString = "https://www.google.com/s2/favicons?domain=$website&sz=128"
         val picasso = Picasso.Builder(context)
             .listener { _, _, exception ->
                 exception?.printStackTrace()
@@ -72,8 +72,6 @@ class PasswordsRVAdapter : RecyclerView.Adapter<PasswordsRVAdapter.PasswordsView
 
         picasso
             .load(urlString)
-            .resize(40, 40)
-            .centerCrop()
             .networkPolicy(NetworkPolicy.OFFLINE)
             .into(targetView, object : Callback {
                 override fun onSuccess() {
@@ -82,8 +80,6 @@ class PasswordsRVAdapter : RecyclerView.Adapter<PasswordsRVAdapter.PasswordsView
                 override fun onError(e: java.lang.Exception?) {
                     picasso
                         .load(urlString)
-                        .resize(40, 40)
-                        .centerCrop()
                         .into(targetView)
                 }
 
