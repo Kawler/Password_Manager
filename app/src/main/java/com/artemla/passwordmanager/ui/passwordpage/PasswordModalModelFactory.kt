@@ -1,4 +1,4 @@
-package com.artemla.passwordmanager.ui.home
+package com.artemla.passwordmanager.ui.passwordpage
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -7,7 +7,7 @@ import com.artemla.passwordmanager.data.db.PasswordDB
 import com.artemla.passwordmanager.data.repositories.PasswordRepositoryImpl
 import com.artemla.passwordmanager.domain.usecases.GetPasswordsUseCase
 
-class HomeViewModelFactory(context: Context) : ViewModelProvider.Factory {
+class PasswordModalModelFactory(context: Context) : ViewModelProvider.Factory {
     private val passwordRepositoryImpl by lazy(LazyThreadSafetyMode.NONE) {
         val db = PasswordDB.getDatabase(context)
         PasswordRepositoryImpl(db.passwordsDao())
@@ -18,7 +18,7 @@ class HomeViewModelFactory(context: Context) : ViewModelProvider.Factory {
     }
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return HomeViewModel(
+        return PasswordModalViewModel(
             getPasswordsUseCase
         ) as T
     }

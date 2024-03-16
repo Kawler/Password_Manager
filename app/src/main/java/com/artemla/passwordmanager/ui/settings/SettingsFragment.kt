@@ -1,16 +1,15 @@
 package com.artemla.passwordmanager.ui.settings
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.artemla.passwordmanager.CryptoManager
-import com.artemla.passwordmanager.PreferencesUtils
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.artemla.passwordmanager.R
-import com.artemla.passwordmanager.databinding.FragmentPasswordModalBinding
 import com.artemla.passwordmanager.databinding.FragmentSettingsBinding
+import com.artemla.passwordmanager.domain.utils.CryptoManager
+import com.artemla.passwordmanager.domain.utils.PreferencesUtils
 
 class SettingsFragment : Fragment() {
 
@@ -26,27 +25,8 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
         val preferences = PreferencesUtils.getInstance(requireContext())
-        val cryptoManager = CryptoManager()
-        binding.btnMasterPasswordSave.setOnClickListener {
-            if (binding.etMasterPassword.text.toString().trim().length > 5) {
-                preferences.setMasterPassword(cryptoManager.encrypt(binding.etMasterPassword.text.toString()))
-                binding.settingsMasterPasswordWarning.text = ""
-            } else {
-                binding.settingsMasterPasswordWarning.text =
-                    getString(R.string.password_must_contain_more_than_5_characters)
-                binding.etMasterPassword.setText("")
-            }
-        }
-
-        if (preferences.getFingerprintAvailable()) {
-            binding.cbFingerprint.isChecked = preferences.getFingerprintState()
-
-            binding.cbFingerprint.setOnCheckedChangeListener { _, isChecked ->
-                preferences.setFingerprintState(isChecked)
-            }
-        } else {
-            binding.fingerprintCheckBox.visibility = View.GONE
-        }
+        setupMasterPasswordButton(preferences)
+        setupFingerprintCheckBox(preferences)
 
         return binding.root
     }
@@ -54,5 +34,42 @@ class SettingsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    private fun setupMasterPasswordButton(preferences: PreferencesUtils) {
+        binding.btnMasterPasswordSave.setOnClickListener {
+            if (binding.etMasterPassword.text.toString().trim().length > 5) {
+                saveMasterPassword(preferences)
+            } else {
+                showPasswordWarning()
+            }
+        }
+    }
+
+    private fun saveMasterPassword(preferences: PreferencesUtils) {
+        val cryptoManager = CryptoManager()
+        preferences.setMasterPassword(cryptoManager.encrypt(binding.etMasterPassword.text.toString()))
+        binding.etMasterPassword.setText("")
+    }
+
+    private fun showPasswordWarning() {
+        binding.settingsMasterPasswordWarning.text =
+            getString(R.string.password_must_contain_more_than_5_characters)
+        binding.etMasterPassword.setText("")
+    }
+
+    private fun setupFingerprintCheckBox(preferences: PreferencesUtils) {
+        if (preferences.getFingerprintAvailable()) {
+            binding.cbFingerprint.isChecked = preferences.getFingerprintState()
+            binding.cbFingerprint.setOnCheckedChangeListener { _, isChecked ->
+                preferences.setFingerprintState(isChecked)
+            }
+        } else {
+            hideFingerprintCheckBox()
+        }
+    }
+
+    private fun hideFingerprintCheckBox() {
+        binding.fingerprintCheckBox.visibility = View.GONE
     }
 }

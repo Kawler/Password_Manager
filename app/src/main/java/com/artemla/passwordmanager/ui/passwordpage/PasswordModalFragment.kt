@@ -1,23 +1,15 @@
 package com.artemla.passwordmanager.ui.passwordpage
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import com.artemla.passwordmanager.CryptoManager
+import androidx.lifecycle.ViewModelProvider
 import com.artemla.passwordmanager.R
 import com.artemla.passwordmanager.databinding.FragmentPasswordModalBinding
-import com.artemla.passwordmanager.db.PasswordDB
-import com.artemla.passwordmanager.dt.Password
+import com.artemla.passwordmanager.domain.entities.Password
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,62 +28,29 @@ class PasswordModalFragment(private val password: Password?) : DialogFragment() 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = FragmentPasswordModalBinding.inflate(layoutInflater)
+        viewModel = ViewModelProvider(
+            this,
+            PasswordModalModelFactory(requireContext())
+        )[PasswordModalViewModel::class.java]
         return activity?.let {
             val builder = MaterialAlertDialogBuilder(requireContext())
-            val coroutineScope = CoroutineScope(Dispatchers.IO)
-            val cryptoManager = CryptoManager()
             if (password != null) {
-                binding.passwordModalPassword.setText(password.password)
-                binding.passwordModalWebsite.setText(password.website)
+                populateFields(password)
             }
-            binding.passwordModalRandom.setOnClickListener {
-                binding.passwordModalPassword.setText(generatePassword())
-            }
+            setRandomPasswordListener()
             builder.setView(binding.root)
                 // Add action buttons.
-                .setPositiveButton("Save",
-                    DialogInterface.OnClickListener { _, _ ->
-                        val db = PasswordDB.getDatabase(requireContext())
-                        if (password == null){
-                            if (binding.passwordModalPassword.toString().trim().isNotEmpty() && binding.passwordModalWebsite.text.toString().trim().isNotEmpty()) {
-                                coroutineScope.launch {
-                                    db.passwordsDao().addPassword(Password(id = null,website = binding.passwordModalWebsite.text.toString().trim(),
-                                        password = cryptoManager.encrypt(binding.passwordModalPassword.text.toString().trim())))
-                                }
-                            }
-                        } else {
-                            if (binding.passwordModalPassword.toString().trim().isNotEmpty() && binding.passwordModalWebsite.text.toString().trim().isNotEmpty()) {
-                                coroutineScope.launch {
-                                    db.passwordsDao().updatePassword(Password(id = password.id,website = binding.passwordModalWebsite.text.toString().trim(),
-                                        password = cryptoManager.encrypt(binding.passwordModalPassword.text.toString().trim())))
-                                }
-                            }
-                        }
-                    })
-                .setNegativeButton("Cancel",
-                    DialogInterface.OnClickListener { _, _ ->
-                        dialog!!.cancel()
-                    })
+                .setPositiveButton("Save"
+                ) { _, _ ->
+                    handleSaveButtonAction(password)
+                }
+                .setNegativeButton("Cancel"
+                ) { _, _ ->
+                    dialog!!.cancel()
+                }
             setDialogWindow()
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
-    }
-
-    private fun generatePassword(): String {
-        val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf('!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_')
-        return (1..15)
-            .map { kotlin.random.Random.nextInt(0, charPool.size) }
-            .map(charPool::get)
-            .joinToString("")
-    }
-
-    private fun setDialogWindow() {
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        dialog?.setCanceledOnTouchOutside(true)
     }
 
     override fun onDestroy() {
@@ -101,5 +60,70 @@ class PasswordModalFragment(private val password: Password?) : DialogFragment() 
 
     override fun getTheme(): Int {
         return R.style.DialogTheme
+    }
+
+    private fun populateFields(password: Password) {
+        binding.passwordModalPassword.setText(password.password)
+        binding.passwordModalWebsite.setText(password.website)
+        binding.passwordModalLogin.setText(password.login)
+    }
+
+    private fun setRandomPasswordListener() {
+        binding.passwordModalRandom.setOnClickListener {
+            binding.passwordModalPassword.setText(viewModel.generatePassword())
+        }
+    }
+
+    private fun handleSaveButtonAction(password: Password?) {
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        if (password == null) {
+            handleNewPasswordSave(coroutineScope)
+        } else {
+            handleExistingPasswordUpdate(password, coroutineScope)
+        }
+    }
+
+    private fun handleNewPasswordSave(coroutineScope: CoroutineScope) {
+        if (validateFields()) {
+            coroutineScope.launch {
+                viewModel.addNewPasswordToDatabase(
+                    website = binding.passwordModalWebsite.text.toString(),
+                    login = binding.passwordModalLogin.text.toString(),
+                    password = binding.passwordModalPassword.text.toString()
+                )
+            }
+        }
+    }
+
+    private fun handleExistingPasswordUpdate(
+        password: Password,
+        coroutineScope: CoroutineScope
+    ) {
+        if (validateFields()) {
+            coroutineScope.launch {
+                viewModel.updatePasswordInDatabase(
+                    password = password,
+                    website = binding.passwordModalWebsite.text.toString(),
+                    login = binding.passwordModalLogin.text.toString(),
+                    newPassword = binding.passwordModalPassword.text.toString()
+                )
+            }
+        }
+    }
+
+    private fun validateFields(): Boolean {
+        return binding.passwordModalPassword.toString().trim().isNotEmpty() &&
+                binding.passwordModalWebsite.text.toString().trim().isNotEmpty() &&
+                binding.passwordModalLogin.text.trim().isNotEmpty()
+    }
+
+    private fun setDialogWindow() {
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog?.setCanceledOnTouchOutside(true)
     }
 }

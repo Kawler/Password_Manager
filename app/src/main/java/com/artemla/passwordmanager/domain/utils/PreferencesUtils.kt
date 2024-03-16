@@ -1,4 +1,4 @@
-package com.artemla.passwordmanager
+package com.artemla.passwordmanager.domain.utils
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -56,7 +56,7 @@ class PreferencesUtils private constructor(context: Context) {
 
     fun setFingerprintState(state: Boolean) {
         editor = preferences.edit()
-        editor.putBoolean(FINGERPRINT_STATE, state)
+        editor.putBoolean(FINGERPRINT_STATE, state).apply()
     }
 
     fun getFingerprintState(): Boolean {
@@ -65,10 +65,10 @@ class PreferencesUtils private constructor(context: Context) {
 
     fun setFingerprintAvailable(state: Boolean) {
         editor = preferences.edit()
-        editor.putBoolean(FINGERPRINT_AVAILABLE, state)
+        editor.putBoolean(FINGERPRINT_AVAILABLE, state).apply()
     }
 
-    fun getFingerprintAvailable() : Boolean {
+    fun getFingerprintAvailable(): Boolean {
         return preferences.getBoolean(FINGERPRINT_AVAILABLE, true)
     }
 

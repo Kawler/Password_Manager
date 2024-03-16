@@ -23,4 +23,14 @@
     <string name="Fingerprint">Fingerprint</string>
     <string name="password_must_contain_more_than_5_characters">Password must contain more than 5 characters</string>
     <string name="no_passwords">No passwords have been stored. Please utilize the \'Add\' button located at the bottom of the screen.</string>
+    <string name="your_login">Your login</string>
+    <string name="wrong_password">Wrong password</string>
+    <string name="password_symbols_warning">Password should contain more than 5 characters</string>
+    <string name="create_password">Create password</string>
+    <string name="master_password">Master Password</string>
+    <string name="save">Save</string>
+    <string name="enable_fingerprint">Enable fingerprint</string>
+    <string name="your_password">Your password</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 </resources>

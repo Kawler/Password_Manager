@@ -1,28 +1,35 @@
 package com.artemla.passwordmanager.ui.home
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
-import com.artemla.passwordmanager.GetPasswordsUseCase
-import com.artemla.passwordmanager.dt.Password
+import com.artemla.passwordmanager.domain.adapters.PasswordsRVAdapter
+import com.artemla.passwordmanager.domain.entities.Password
+import com.artemla.passwordmanager.domain.usecases.GetPasswordsUseCase
+import com.artemla.passwordmanager.domain.utils.CryptoManager
 
 class HomeViewModel(private val getPasswordsUseCase: GetPasswordsUseCase) : ViewModel() {
 
-    fun getData(): LiveData<List<Password>> {
+    fun getData(): LiveData<Array<Password>> {
         return getPasswordsUseCase.getData().asLiveData()
     }
 
-    suspend fun deletePassword(password: Password){
-        getPasswordsUseCase.deletePassword(password)
-    }
+    fun fillAdapter(adapter: PasswordsRVAdapter, array: Array<Password>) {
+        val cryptoManager = CryptoManager()
 
-    suspend fun addPassword(password: Password){
-        getPasswordsUseCase.addPassword(password)
-    }
-
-    suspend fun getPasswordById(id: Int): Password {
-        return getPasswordsUseCase.getPasswordById(id)
+        if (array.isNotEmpty()) {
+            val dataArray = Array(array.size) { index ->
+                Password(
+                    array[index].id,
+                    array[index].website,
+                    cryptoManager.decrypt(array[index].login),
+                    cryptoManager.decrypt(array[index].password)
+                )
+            }
+            adapter.data = dataArray
+        } else {
+            adapter.data = emptyArray()
+        }
     }
 
 }
