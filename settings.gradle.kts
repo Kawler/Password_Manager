@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Password Manager"
 include(":app")
- 
+include(":benchmark")

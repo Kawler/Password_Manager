@@ -39,6 +39,12 @@ android {
             )
 
         }
+        create("benchmark") {
+            initWith(buildTypes.getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -68,6 +74,7 @@ dependencies {
 
     implementation("com.squareup.picasso:picasso:2.8")
     implementation("com.github.AppIntro:AppIntro:6.3.1")
+    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
 
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
